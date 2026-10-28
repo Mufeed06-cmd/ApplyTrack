@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApplyTrack — Job Application Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Global Toast Alerts -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <span class="logo-icon">💼</span>
+        <span class="logo-text">Apply<strong>Track</strong></span>
+      </div>
+      <div id="nav-user-section" class="nav-user-section hidden">
+        <span class="user-greeting">Welcome, <strong id="current-username">User</strong></span>
+        <button id="logout-btn" class="btn btn-outline-sm">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- AUTH SECTION (Login / Register) -->
+    <section id="auth-section" class="auth-section">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Track Your Career Journey</h2>
+          <p class="subtitle">Keep all your job applications organized in one secure place.</p>
+        </div>
+
+        <div class="auth-tabs">
+          <button id="tab-login" class="tab-btn active">Log In</button>
+          <button id="tab-register" class="tab-btn">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" required placeholder="Enter username" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="Enter password" autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
+            <span>Log In</span>
+          </button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="auth-form hidden">
+          <div class="form-group">
+            <label for="reg-username">Username</label>
+            <input type="text" id="reg-username" required minlength="3" maxlength="50" placeholder="Choose a username (3-50 chars)" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="reg-submit-btn">
+            <span>Create Account</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- DASHBOARD SECTION -->
+    <section id="dashboard-section" class="dashboard-section hidden">
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card" data-status="All">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-label">Total Applications</div>
+        </div>
+        <div class="stat-card applied" data-status="Applied">
+          <div class="stat-num" id="stat-applied">0</div>
+          <div class="stat-label">Applied</div>
+        </div>
+        <div class="stat-card interview" data-status="Interview">
+          <div class="stat-num" id="stat-interview">0</div>
+          <div class="stat-label">Interviewing</div>
+        </div>
+        <div class="stat-card offer" data-status="Offer">
+          <div class="stat-num" id="stat-offer">0</div>
+          <div class="stat-label">Offers</div>
+        </div>
+        <div class="stat-card rejected" data-status="Rejected">
+          <div class="stat-num" id="stat-rejected">0</div>
+          <div class="stat-label">Rejected</div>
+        </div>
+        <div class="stat-card ghosted" data-status="Ghosted">
+          <div class="stat-num" id="stat-ghosted">0</div>
+          <div class="stat-label">Ghosted</div>
+        </div>
+      </div>
+
+      <!-- Controls Bar -->
+      <div class="dashboard-controls">
+        <div class="search-filter-group">
+          <input type="text" id="search-input" placeholder="🔍 Search company or role..." class="search-box">
+          <select id="status-filter" class="select-filter">
+            <option value="">All Statuses</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Ghosted">Ghosted</option>
+          </select>
+        </div>
+        <button id="add-app-btn" class="btn btn-primary">+ Add Application</button>
+      </div>
+
+      <!-- Applications Table / Container -->
+      <div class="table-wrapper">
+        <table class="apps-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Applied Date</th>
+              <th>Interview Date</th>
+              <th>Notes</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="apps-table-body">
+            <!-- Dynamically injected rows -->
+          </tbody>
+        </table>
+        <div id="empty-state" class="empty-state hidden">
+          <p>No job applications found matching your criteria.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ADD / EDIT APPLICATION MODAL -->
+  <div id="app-modal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Job Application</h3>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <form id="app-form">
+        <input type="hidden" id="modal-app-id">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="modal-company">Company *</label>
+            <input type="text" id="modal-company" required maxlength="100" placeholder="e.g. Google">
+          </div>
+          <div class="form-group flex-1">
+            <label for="modal-role">Role *</label>
+            <input type="text" id="modal-role" required maxlength="100" placeholder="e.g. Software Engineer">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="modal-status">Status *</label>
+            <select id="modal-status" required>
+              <option value="Applied">Applied</option>
+              <option value="Interview">Interview</option>
+              <option value="Offer">Offer</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Ghosted">Ghosted</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="modal-applied-date">Applied Date *</label>
+            <input type="date" id="modal-applied-date" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="modal-link">Job Link (URL)</label>
+            <input type="url" id="modal-link" maxlength="2083" placeholder="https://...">
+          </div>
+          <div class="form-group flex-1">
+            <label for="modal-interview-date">Interview Date</label>
+            <input type="date" id="modal-interview-date">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modal-notes">Notes & Follow-ups</label>
+          <textarea id="modal-notes" rows="3" placeholder="Interview details, referral contacts, compensation notes..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-save-btn">Save Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
